@@ -14,7 +14,6 @@
     </style>
 </head>
 <body>
-
     <div class="container" id="mainContainer">
         <img id="display-img" class="main-img" src="asking.gif" alt="Asking...">
         <h1 id="questionText">Would you date me?</h1>
@@ -28,7 +27,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // This is your exact Firebase info from your screen
         const firebaseConfig = {
             apiKey: "AIzaSyD1K2i9LuXp4B5O3HFqJ8C24N62r6aP_AQ",
             authDomain: "asking-project.firebaseapp.com",
@@ -42,19 +40,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // This is your exact text list
-        const noTexts = [
-            "No", 
-            "Are you sure?", 
-            "Really Sure", 
-            "Are you possitive?", 
-            "Pookie please...", 
-            "Just think about it!", 
-            "If you say no, i will be verry sad", 
-            "I am verry sad", 
-            "Please"
-        ];
-        
+        const noTexts = ["No", "Are you sure?", "Really Sure", "Are you possitive?", "Pookie please...", "Just think about it!", "If you say no, i will be verry sad", "I am verry sad", "Please"];
         let noClickCount = 0;
         let yesFontSize = 18;
         let userIp = "Unknown";
@@ -65,10 +51,8 @@
         window.handleNo = function() {
             const noBtn = document.getElementById('noBtn');
             const yesBtn = document.getElementById('yesBtn');
-            
             noClickCount++;
             noBtn.innerText = noTexts[Math.min(noClickCount, noTexts.length - 1)];
-            
             yesFontSize += 25;
             yesBtn.style.fontSize = yesFontSize + 'px';
         };
@@ -85,7 +69,7 @@
                     time: serverTimestamp(),
                     noClicks: noClickCount
                 });
-            } catch (e) { console.error("Database error: ", e); }
+            } catch (e) { console.error("Error: ", e); }
         };
     </script>
 </body>
