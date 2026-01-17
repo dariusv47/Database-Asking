@@ -27,6 +27,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // This is your specific project info you just sent me
         const firebaseConfig = {
             apiKey: "AIzaSyD1K2i9LuXp4B5O3HFqJ8C24N62r6aP_AQ",
             authDomain: "asking-project.firebaseapp.com",
@@ -45,6 +46,7 @@
         let yesFontSize = 18;
         let userIp = "Unknown";
 
+        // This gets their IP address
         fetch('https://api.ipify.org?format=json')
             .then(res => res.json()).then(data => { userIp = data.ip; });
 
@@ -62,6 +64,7 @@
                 <img class="main-img" src="success.gif">
                 <h1 style="color: #d35d6e; font-size: 2.5rem;">Knew you would say yes!</h1>
             `;
+            // THIS is the part that sends the "shit" to Firebase
             try {
                 await addDoc(collection(db, "responses"), {
                     answer: "YES",
