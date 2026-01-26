@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CRITICAL_SYSTEM_ERROR</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #ff0000;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+            cursor: none;
+        }
+
+        /* CRT Scanline Effect */
+        body::after {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #pet {
+            position: fixed;
+            width: 120px;
+            height: auto;
+            z-index: 500;
+            pointer-events: none;
+            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 8px #ff0000);
+            display: none;
+        }
+
+        .floating { animation: bounce 2s ease-in-out infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        #interactionOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: #440000;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+        }
+
+        .header { font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
+        .instructions { font-size: 1.1rem; max-width: 600px; text-align: center; line-height: 1.6; margin-bottom: 40px; }
+        
+        .input-box { opacity: 0; transition: opacity 1.5s ease; text-align: center; }
+
+        input {
+            background: black;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            padding: 15px;
+            width: 320px;
+            font-family: 'Courier New', monospace;
+            outline: none;
+            font-size: 1.2rem;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .btn {
+            background: #ff0000;
+            color: black;
+            border: none;
+            padding: 12px 50px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 25px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn:hover { background: #fff; box-shadow: 0 0 20px #ff0000; }
+
+        .timer { margin-top: 60px; font-size: 1.5rem; color: #aa0000; }
+
+        #errorBox {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #0a0000;
+            border: 3px solid #ff0000;
+            padding: 40px;
+            z-index: 2000;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.6);
+        }
+
+        .overlay-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1999; }
+        .glitch-text { animation: blink 0.1s infinite alternate; }
+        @keyframes blink { from { opacity: 1; } to { opacity: 0.7; } }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="interactionOverlay">
+        [ SYSTEM IDLE - CLICK ANYWHERE TO INITIALIZE ]
+    </div>
+
+    <img src="pet.gif" id="pet" class="floating" alt="System Pet">
+
+    <div class="header glitch-text" id="headerLine"></div>
+    <div class="instructions" id="bodyLine"></div>
+
+    <div class="input-box" id="uiArea">
+        <p>DECRYPTION KEY REQUIRED:</p>
+        <input type="password" id="keyInput" placeholder="ENTER KEY" autocomplete="off">
+        <br>
+        <button class="btn" onclick="triggerAlert()">RUN DECRYPT.EXE</button>
+    </div>
+
+    <div class="timer">TIME_REMAINING: <span id="clock">10:00</span></div>
+
+    <div class="overlay-bg" id="modalOverlay"></div>
+    
+    <div id="errorBox">
+        <h1 id="modalHeader" style="margin:0;">ACCESS DENIED</h1>
+        <p id="modalBody" style="color: #ff0000; margin: 20px 0;">INVALID SECURITY KEY DETECTED.</p>
+        <button id="modalBtn" class="btn" onclick="hideAlert()">TRY AGAIN</button>
+    </div>
+
+    <script>
+        const hText = "WE SEE YOU BUT YOU CAN'T SEE US";
+        const bText = "Security breach detected. Files have been locked. Transfer $500 BTC to adriancas@btc.co. DO NOT EXIT.";
+        const CORRECT_KEY = "Adi-rasit";
+        
+        let hIdx = 0, bIdx = 0, initialized = false;
+        const pet = document.getElementById('pet');
+
+        function goFullScreen(e) {
+            // Secret Exit using Alt Key
+            if (e.altKey) {
+                if (document.fullscreenElement) document.exitFullscreen();
+                return;
+            }
+
+            if (initialized) return;
+            initialized = true;
+
+            let doc = document.documentElement;
+            if (doc.requestFullscreen) doc.requestFullscreen();
+            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+
+            document.getElementById("interactionOverlay").style.display = "none";
+            document.body.style.cursor = "default";
+            
+            pet.style.display = "block";
+            setInterval(movePet, 3000);
+            movePet();
+
+            typeWriter();
+        }
+
+        window.addEventListener("mousedown", goFullScreen);
+        window.addEventListener("keydown", goFullScreen);
+
+        function typeWriter() {
+            if (hIdx < hText.length) {
+                document.getElementById("headerLine").innerHTML += hText.charAt(hIdx++);
+                setTimeout(typeWriter, 50);
+            } else if (bIdx < bText.length) {
+                document.getElementById("bodyLine").innerHTML += bText.charAt(bIdx++);
+                setTimeout(typeWriter, 30);
+            } else {
+                document.getElementById("uiArea").style.opacity = "1";
+            }
+        }
+
+        function movePet() {
+            const maxX = window.innerWidth - pet.clientWidth;
+            const maxY = window.innerHeight - pet.clientHeight;
+            pet.style.left = Math.floor(Math.random() * maxX) + 'px';
+            pet.style.top = Math.floor(Math.random() * maxY) + 'px';
+        }
+
+        function triggerAlert() {
+            const inputVal = document.getElementById("keyInput").value;
+            const errorBox = document.getElementById("errorBox");
+            const modalOverlay = document.getElementById("modalOverlay");
+            const mHeader = document.getElementById("modalHeader");
+            const mBody = document.getElementById("modalBody");
+            const mBtn = document.getElementById("modalBtn");
+
+            if (inputVal === CORRECT_KEY) {
+                mHeader.innerText = "ACCESS GRANTED";
+                mHeader.style.color = "#00ff00";
+                mBody.innerText = "DECRYPTION COMPLETE. SYSTEM RESTORED.";
+                mBody.style.color = "#00ff00";
+                errorBox.style.borderColor = "#00ff00";
+                mBtn.innerText = "EXIT SYSTEM";
+                mBtn.style.background = "#00ff00";
+                mBtn.onclick = () => { window.location.reload(); };
+            } else {
+                mHeader.innerText = "ACCESS DENIED";
+                mHeader.style.color = "#ff0000";
+                mBody.innerText = "THE KEY ENTERED DOES NOT MATCH OUR DATABASE.";
+                errorBox.style.borderColor = "#ff0000";
+                // Aggressive pet jump on error
+                movePet();
+            }
+
+            errorBox.style.display = "block";
+            modalOverlay.style.display = "block";
+        }
+
+        function hideAlert() {
+            document.getElementById("errorBox").style.display = "none";
+            document.getElementById("modalOverlay").style.display = "none";
+            document.getElementById("keyInput").value = "";
+        }
+
+        let time = 600;
+        setInterval(() => {
+            const min = Math.floor(time / 60);
+            const sec = time % 60;
+            document.getElementById("clock").innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+            if(time > 0) time--;
+        }, 1000);
+    </script>
+</body>
+</html>
+
